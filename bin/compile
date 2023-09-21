@@ -40,26 +40,31 @@ build_pubspec() {
   export PATH=$PATH:$DART_PATH:$PUB_CACHE_BIN
   message "*** Running pub get"
 
-  pub --version
+  dart pub --version
 
   #start pub from the /app folder to have correct symlink paths
-  pub get  
+  dart pub get  
   
   dart pub global activate webdev
-  if [ -d "web" ]
-  then
-    message "*** Running webdev build"
-    if [[ -z "$DART_BUILD_CMD" ]]
-    then
-      message 'Building with "webdev build"'
-      webdev build
-    else
-      message "Building with \"$DART_BUILD_CMD\""
-      eval $DART_BUILD_CMD
-    fi
-  else
-    message '*** Skipping pub build because "web" folder not found'
-  fi
+  # if [ -d "web" ]
+  # then
+  #   message "*** Running webdev build"
+  #   if [[ -z "$DART_BUILD_CMD" ]]
+  #   then
+  #     message 'Building with "webdev build"'
+  #     webdev build
+  #   else
+  #     message "Building with \"$DART_BUILD_CMD\""
+  #     eval $DART_BUILD_CMD
+  #   fi
+  # else
+  #   message '*** Skipping pub build because "web" folder not found'
+  # fi
+      for package in $DART_GLOBAL_PACKAGES
+    do
+        PACKAGE_ELEMENTS=(${package//@/ })
+        /app/dart-sdk/bin/pub global activate "${PACKAGE_ELEMENTS[0]}" "${PACKAGE_ELEMENTS[1]}"
+    done
 }
 
 export_env_dir "$3"
@@ -94,7 +99,7 @@ case "${DART_SDK_URL: -3}" in
     ;;
   zip)
     message "SDK: zip detected"
-    curl -L -k "$DART_SDK_URL" ; unzip -o -q dart-sdk.zip
+    curl -L -k $DART_SDK_URL > dart-sdk.zip ; unzip -o -q dart-sdk.zip
     ;;
   deb)
     message "SDK: deb detected"
